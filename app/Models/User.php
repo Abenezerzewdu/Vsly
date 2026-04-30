@@ -23,6 +23,26 @@ class User extends Authenticatable
         'password',
     ];
 
+     public function takes()
+    {
+        return $this->hasMany(Take::class);
+    }
+
+     public function duelsStarted()
+    {
+        return $this->hasMany(Duel::class, 'challenger_id');
+    }
+
+      public function duelsReceived()
+    {
+        return $this->hasMany(Duel::class, 'opponent_id');
+    }
+
+     public function votes()
+    {
+        return $this->hasMany(Vote::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
