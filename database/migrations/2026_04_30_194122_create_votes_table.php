@@ -11,10 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('votes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+       Schema::create('votes', function (Blueprint $table) {
+    $table->id();
+
+    $table->foreignId('duel_id')
+        ->constrained()
+        ->cascadeOnDelete();
+
+    $table->foreignId('user_id')
+        ->constrained()
+        ->cascadeOnDelete();
+
+    $table->foreignId('voted_for')
+        ->constrained('users')
+        ->cascadeOnDelete();
+
+    $table->timestamps();
+
+    // One vote per user per duel
+    $table->unique(['duel_id', 'user_id']);
+});
     }
 
     /**

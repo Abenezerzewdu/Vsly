@@ -11,10 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('takes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+       Schema::create('takes', function (Blueprint $table) {
+    $table->id();
+
+    $table->foreignId('user_id')
+        ->constrained()
+        ->cascadeOnDelete();
+
+    $table->string('content', 280); // short + punchy
+    $table->boolean('is_hot')->default(false);
+
+    $table->timestamps();
+});
     }
 
     /**

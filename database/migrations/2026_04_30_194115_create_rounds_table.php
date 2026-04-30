@@ -12,9 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('rounds', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+
+    $table->foreignId('duel_id')
+        ->constrained()
+        ->cascadeOnDelete();
+
+    $table->unsignedTinyInteger('round_number'); // 1, 2, 3
+
+    $table->text('challenger_response')->nullable();
+    $table->text('opponent_response')->nullable();
+
+    $table->boolean('completed')->default(false);
+
+    $table->timestamps();
+
+    // Prevent duplicate rounds
+    $table->unique(['duel_id', 'round_number']);
+});
     }
 
     /**

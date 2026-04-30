@@ -12,9 +12,33 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('duels', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+
+    $table->foreignId('take_id')
+        ->nullable()
+        ->constrained()
+        ->nullOnDelete();
+
+    $table->foreignId('challenger_id')
+        ->constrained('users')
+        ->cascadeOnDelete();
+
+    $table->foreignId('opponent_id')
+        ->constrained('users')
+        ->cascadeOnDelete();
+
+    $table->enum('status', ['pending', 'active', 'finished'])
+        ->default('pending');
+
+    $table->foreignId('winner_id')
+        ->nullable()
+        ->constrained('users')
+        ->nullOnDelete();
+
+    $table->unsignedTinyInteger('current_round')->default(1);
+
+    $table->timestamps();
+});
     }
 
     /**

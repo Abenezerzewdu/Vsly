@@ -12,9 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reactions', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+
+    $table->foreignId('take_id')
+        ->constrained()
+        ->cascadeOnDelete();
+
+    $table->foreignId('user_id')
+        ->constrained()
+        ->cascadeOnDelete();
+
+    $table->enum('type', ['fire', 'weak', 'clean', 'dodged']);
+
+    $table->timestamps();
+
+    // Prevent spam reactions
+    $table->unique(['take_id', 'user_id']);
+});
     }
 
     /**
