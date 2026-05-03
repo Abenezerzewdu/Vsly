@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DuelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TakeController;
 use Illuminate\Foundation\Application;
@@ -31,4 +32,7 @@ Route::resource('takes', TakeController::class);
 
 Route::post('/takes/{take}/challenge', [DuelController::class, 'challenge']);
 
+Route::post('/takes/{take}/challenge', [DuelController::class, 'store'])
+    ->name('duels.store')
+    ->middleware('auth');
 require __DIR__.'/auth.php';
