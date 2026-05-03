@@ -36,7 +36,7 @@ return new class extends Migration
         ->nullOnDelete();
 
     $table->unsignedTinyInteger('current_round')->default(1);
-
+    $table->unsignedTinyInteger('total_rounds')->default(3);
     $table->timestamps();
 });
     }
