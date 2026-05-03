@@ -15,9 +15,8 @@ class DuelController extends Controller
         $user = $request->user();
 
         //  Prevent self challenge
-        if ($take->user_id === $user->id) {
-            abort(403, 'You cannot challenge your own take.');
-        }
+        $this->authorize('create', [Duel::class, $take]);
+        
 
         //  Prevent duplicate active duel
         $existing = Duel::where('take_id', $take->id)
