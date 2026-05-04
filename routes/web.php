@@ -30,9 +30,14 @@ Route::middleware('auth')->group(function () {
 //takes route 
 Route::resource('takes', TakeController::class);
 
-Route::post('/takes/{take}/challenge', [DuelController::class, 'challenge']);
 
 Route::post('/takes/{take}/challenge', [DuelController::class, 'store'])
     ->name('duels.store')
     ->middleware('auth');
+
+//duel
+Route::post('/duels/{duel}/move', [DuelController::class, 'submitMove'])
+    ->name('duels.move')
+    ->middleware('auth');
+
 require __DIR__.'/auth.php';

@@ -65,4 +65,19 @@ class DuelPolicy
     {
         return false;
     }
+
+     public function respond(User $user, Duel $duel): bool
+    {
+        // must be challenger or opponent
+        if (!in_array($user->id, [$duel->challenger_id, $duel->opponent_id])) {
+            return false;
+        }
+
+        // duel must be active
+        if ($duel->status !== 'active') {
+            return false;
+        }
+
+        return true;
+    }
 }

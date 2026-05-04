@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Duel;
 use App\Models\Round;
 use App\Models\Take;
+use App\Services\DuelService;
 use Illuminate\Http\Request;
 
 class DuelController extends Controller
 {
-    //
+    //create challenge in a take
      public function store(Request $request, Take $take)
     {
         $user = $request->user();
@@ -48,4 +49,22 @@ class DuelController extends Controller
 
         return redirect()->route('duels.show', $duel);
     }
+
+    //make a move for challenges
+    public function submitMove(Request $request, Duel $duel, DuelService $duelService)
+{
+    $validated = $request->validate([
+        'response' => ['required', 'string', 'max:500']
+    ]);
+
+    $this->authorize('respond', $duel);
+
+    $duelService->submitMove(
+        duel: $duel,
+        user: $request->user(),
+        response: $validated['response']
+    );
+
+    return back()->with('success', 'Move submitted.');
+}
 }
