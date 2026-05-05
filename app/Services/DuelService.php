@@ -36,28 +36,43 @@ class DuelService
     }
 
     private function applyMove($duel, $round, $user, $response): void
-    {
-        if ($user->id === $duel->challenger_id) {
+{
+    $isChallenger = $user->id === $duel->challenger_id;
+    $isOpponent = $user->id === $duel->opponent_id;
 
-            if ($round->challenger_response) {
-                throw new \Exception('Already responded.');
-            }
-
-            $round->challenger_response = $response;
-
-        } elseif ($user->id === $duel->opponent_id) {
-
-            if ($round->opponent_response) {
-                throw new \Exception('Already responded.');
-            }
-
-            $round->opponent_response = $response;
-
-        } else {
-            throw new \Exception('Unauthorized participant.');
-        }
+    //  Enforce turn
+    if (
+        ($duel->turn === 'challenger' && !$isChallenger) ||
+        ($duel->turn === 'opponent' && !$isOpponent)
+    ) {
+        throw new \Exception('Not your turn.');
     }
 
+    if ($isChallenger) {
+
+        if ($round->challenger_response) {
+            throw new \Exception('Already responded.');
+        }
+
+        $round->challenger_response = $response;
+
+        // switch turn
+        $duel->turn = 'opponent';
+
+    } elseif ($isOpponent) {
+
+        if ($round->opponent_response) {
+            throw new \Exception('Already responded.');
+        }
+
+        $round->opponent_response = $response;
+
+        // switch turn
+        $duel->turn = 'challenger';
+    } else {
+        throw new \Exception('Unauthorized participant.');
+    }
+}
     private function isRoundComplete($round): bool
     {
         return $round->challenger_response && $round->opponent_response;

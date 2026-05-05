@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class DuelController extends Controller
 {
-    //create challenge in a take
+    //make a challenge in a take
      public function store(Request $request, Take $take)
     {
         $user = $request->user();
@@ -67,4 +67,5 @@ class DuelController extends Controller
 
     return back()->with('success', 'Move submitted.');
 }
+
 }
