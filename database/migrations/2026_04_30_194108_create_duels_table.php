@@ -37,6 +37,7 @@ return new class extends Migration
 
     $table->unsignedTinyInteger('current_round')->default(1);
     $table->unsignedTinyInteger('total_rounds')->default(3);
+    $table->enum('turn', ['challenger', 'opponent'])->default('challenger');
     $table->timestamps();
 });
     }

@@ -79,19 +79,22 @@ class DuelService
     }
 
     private function completeRound(Duel $duel, $round): void
-    {
-        $round->completed = true;
+{
+    $round->completed = true;
 
-        if ($duel->current_round < $duel->total_rounds) {
+    if ($duel->current_round < $duel->total_rounds) {
 
-            $duel->current_round++;
+        $duel->current_round++;
 
-            $duel->rounds()->create([
-                'round_number' => $duel->current_round
-            ]);
+        $duel->rounds()->create([
+            'round_number' => $duel->current_round
+        ]);
 
-        } else {
-            $duel->status = 'finished';
-        }
+        // 🔥 Reset turn to challenger
+        $duel->turn = 'challenger';
+
+    } else {
+        $duel->status = 'finished';
     }
+}
 }
