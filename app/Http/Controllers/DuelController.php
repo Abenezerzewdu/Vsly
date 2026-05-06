@@ -35,13 +35,16 @@ class DuelController extends Controller
 
         //  Create duel
         $duel = Duel::create([
-            'take_id' => $take->id,
-            'challenger_id' => $user->id,
-            'opponent_id' => $take->user_id,
-            'status' => 'active',
-            'current_round' => 1,
-        ]);
-
+    'take_id' => $take->id,
+    'challenger_id' => $user->id,
+    'opponent_id' => $take->user_id,
+    'status' => 'active',
+    'current_round' => 1,
+    'total_rounds' => 3,
+    'turn' => 'challenger',
+    'turn_time_limit' => 120, // default (2 min)
+    'turn_started_at' => now(),
+]);
         //  Create first round
         Round::create([
             'duel_id' => $duel->id,

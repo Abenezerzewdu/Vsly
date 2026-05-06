@@ -10,13 +10,16 @@ class Duel extends Model
     //
         use HasFactory;
  protected $fillable = [
-        'take_id',
-        'challenger_id',
-        'opponent_id',
-        'status',
-        'winner_id',
-        'current_round'
-    ];
+    'take_id',
+    'challenger_id',
+    'opponent_id',
+    'status',
+    'current_round',
+    'total_rounds',
+    'turn',
+    'turn_time_limit',
+    'turn_started_at',
+];
     public function take()
     {
         return $this->belongsTo(Take::class);
