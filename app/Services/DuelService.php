@@ -21,7 +21,8 @@ class DuelService
             if (!$round) {
                 throw new \Exception('Round not found.');
             }
-
+            //check turn not expired first
+            $this->ensureTurnNotExpired($duel);
             //  Assign move
             $this->applyMove($duel, $round, $user, $response);
 
@@ -34,6 +35,21 @@ class DuelService
             $duel->save();
         });
     }
+
+    private function ensureTurnNotExpired(Duel $duel): void
+{
+    if (!$duel->turn_started_at) {
+        return;
+    }
+
+    $expiresAt = $duel->turn_started_at
+        ->copy()
+        ->addSeconds($duel->turn_time_limit);
+
+    if (now()->greaterThan($expiresAt)) {
+        throw new \Exception('Turn time expired.');
+    }
+}
 
     private function applyMove($duel, $round, $user, $response): void
 {
@@ -67,6 +83,7 @@ class DuelService
 
         $round->opponent_response = $response;
 
+        $duel->turn_started_at = now();
         // switch turn
         $duel->turn = 'challenger';
     } else {
