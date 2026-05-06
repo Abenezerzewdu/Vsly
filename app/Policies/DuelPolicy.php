@@ -80,4 +80,23 @@ class DuelPolicy
 
         return true;
     }
+
+    
+    public function vote(User $user, Duel $duel): bool
+{
+    // duel must be finished
+    if ($duel->status !== 'finished') {
+        return false;
+    }
+
+    // participants cannot vote
+    if (in_array($user->id, [
+        $duel->challenger_id,
+        $duel->opponent_id
+    ])) {
+        return false;
+    }
+
+    return true;
+}
 }

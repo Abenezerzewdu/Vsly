@@ -40,4 +40,9 @@ Route::post('/duels/{duel}/move', [DuelController::class, 'submitMove'])
     ->name('duels.move')
     ->middleware('auth');
 
+//vote
+Route::post('/duels/{duel}/vote', [VoteController::class, 'store'])
+    ->name('duels.vote')
+    ->middleware('auth');
+
 require __DIR__.'/auth.php';

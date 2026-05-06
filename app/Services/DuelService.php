@@ -90,7 +90,7 @@ class DuelService
             'round_number' => $duel->current_round
         ]);
 
-        // 🔥 Reset turn to challenger
+        // Reset turn to challenger
         $duel->turn = 'challenger';
 
     } else {
