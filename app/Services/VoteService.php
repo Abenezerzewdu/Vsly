@@ -8,28 +8,57 @@ use App\Models\Vote;
 class VoteService
 {
    
-    public function vote(Duel $duel, User $user, int $votedFor): void
-    {
-        //  Prevent duplicate vote (extra safety beyond DB)
-        if ($duel->votes()->where('user_id', $user->id)->exists()) {
-            throw new \Exception('You have already voted.');
-        }
-
-        //  Ensure voted_for is valid participant
-        if (!in_array($votedFor, [
-            $duel->challenger_id,
-            $duel->opponent_id
-        ])) {
-            throw new \Exception('Invalid vote target.');
-        }
-
-        Vote::create([
-            'duel_id' => $duel->id,
-            'user_id' => $user->id,
-            'voted_for' => $votedFor
-        ]);
+   public function vote(Duel $duel, User $user, int $votedFor): void
+{
+    //  Prevent duplicate vote
+    if ($duel->votes()->where('user_id', $user->id)->exists()) {
+        throw new \Exception('You have already voted.');
     }
 
+    //  Validate target
+    if (!in_array($votedFor, [
+        $duel->challenger_id,
+        $duel->opponent_id
+    ])) {
+        throw new \Exception('Invalid vote target.');
+    }
+
+    //  Store vote
+    $duel->votes()->create([
+        'user_id' => $user->id,
+        'voted_for' => $votedFor
+    ]);
+
+    //  Auto-calculate winner
+    $this->recalculateWinner($duel);
+}
+
+private function recalculateWinner(Duel $duel): void
+{
+    $votes = $duel->votes()
+        ->selectRaw('voted_for, COUNT(*) as total')
+        ->groupBy('voted_for')
+        ->pluck('total', 'voted_for');
+
+    if ($votes->isEmpty()) {
+        return;
+    }
+
+    // find max
+    $maxVotes = $votes->max();
+
+    // check tie
+    $topCandidates = $votes->filter(fn ($count) => $count === $maxVotes);
+
+    if ($topCandidates->count() > 1) {
+        // tie → no winner yet
+        $duel->winner_id = null;
+    } else {
+        $duel->winner_id = $topCandidates->keys()->first();
+    }
+
+    $duel->save();
+}
     //duel winner for now dictated by the votes
     public function decideWinner(Duel $duel): void
 {
