@@ -29,4 +29,23 @@ class VoteService
             'voted_for' => $votedFor
         ]);
     }
+
+    //duel winner for now dictated by the votes
+    public function decideWinner(Duel $duel): void
+{
+    if ($duel->status !== 'finished') {
+        throw new \Exception('Duel not finished.');
+    }
+
+    $result = $duel->votes()
+        ->selectRaw('voted_for, COUNT(*) as total')
+        ->groupBy('voted_for')
+        ->orderByDesc('total')
+        ->first();
+
+    if ($result) {
+        $duel->winner_id = $result->voted_for;
+        $duel->save();
+    }
+}
 }
