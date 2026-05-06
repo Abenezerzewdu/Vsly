@@ -7,6 +7,7 @@ use App\Models\Round;
 use App\Models\Take;
 use App\Services\DuelService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DuelController extends Controller
 {
@@ -68,4 +69,40 @@ class DuelController extends Controller
     return back()->with('success', 'Move submitted.');
 }
 
+//
+public function show(Duel $duel)
+{
+    $duel->load([
+        'challenger:id,name',
+        'opponent:id,name',
+        'rounds',
+        'votes'
+    ]);
+
+    return Inertia::render('Duels/Show', [
+        'duel' => [
+            'id' => $duel->id,
+            'status' => $duel->status,
+            'current_round' => $duel->current_round,
+            'total_rounds' => $duel->total_rounds,
+
+            'challenger' => $duel->challenger,
+            'opponent' => $duel->opponent,
+
+            'winner_id' => $duel->winner_id,
+
+            // vote stats
+            'votes' => $duel->votes
+                ->groupBy('voted_for')
+                ->map(fn ($group) => $group->count()),
+
+            // rounds data
+            'rounds' => $duel->rounds->map(fn ($round) => [
+                'round_number' => $round->round_number,
+                'challenger_response' => $round->challenger_response,
+                'opponent_response' => $round->opponent_response,
+            ]),
+        ]
+    ]);
+}
 }
