@@ -8,16 +8,18 @@ use Inertia\Inertia;
 
 class TakeController extends Controller
 {
-   
-
-    //  List
+    /**
+     * Display a listing of the takes.
+     * 
+     * @return \Inertia\Response
+     */
     public function index()
     {
         $takes = Take::query()
             ->with('user:id,name')
             ->latest()
             ->paginate(10)
-            ->through(fn ($take) => [
+            ->through(fn($take) => [
                 'id' => $take->id,
                 'content' => $take->content,
                 'created_at' => $take->created_at->diffForHumans(),
@@ -32,13 +34,22 @@ class TakeController extends Controller
         ]);
     }
 
-    //  Create page (optional)
+    /**
+     * Show the form for creating a new take.
+     * 
+     * @return \Inertia\Response
+     */
     public function create()
     {
         return Inertia::render('Takes/Create');
     }
 
-    //  Store
+    /**
+     * Store a newly created take in storage.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -55,7 +66,12 @@ class TakeController extends Controller
             ->with('success', 'Take posted.');
     }
 
-    // Show single take
+    /**
+     * Display the specified take.
+     * 
+     * @param \App\Models\Take $take
+     * @return \Inertia\Response
+     */
     public function show(Take $take)
     {
         $take->load('user:id,name', 'duels');
@@ -71,7 +87,12 @@ class TakeController extends Controller
         ]);
     }
 
-    //  Edit page
+    /**
+     * Show the form for editing the specified take.
+     * 
+     * @param \App\Models\Take $take
+     * @return \Inertia\Response
+     */
     public function edit(Take $take)
     {
         $this->authorize('update', $take);
@@ -81,7 +102,13 @@ class TakeController extends Controller
         ]);
     }
 
-    //  Update
+    /**
+     * Update the specified take in storage.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Take $take
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, Take $take)
     {
         $this->authorize('update', $take);
@@ -97,7 +124,12 @@ class TakeController extends Controller
             ->with('success', 'Take updated.');
     }
 
-    // Delete
+    /**
+     * Remove the specified take from storage.
+     * 
+     * @param \App\Models\Take $take
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Take $take)
     {
         $this->authorize('delete', $take);

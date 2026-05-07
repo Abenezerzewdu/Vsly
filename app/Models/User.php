@@ -23,22 +23,42 @@ class User extends Authenticatable
         'password',
     ];
 
-     public function takes()
+    /**
+     * Get the takes posted by the user.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function takes()
     {
         return $this->hasMany(Take::class);
     }
 
-     public function duelsStarted()
+    /**
+     * Get the duels where the user is the challenger.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function duelsStarted()
     {
         return $this->hasMany(Duel::class, 'challenger_id');
     }
 
-      public function duelsReceived()
+    /**
+     * Get the duels where the user is the opponent.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function duelsReceived()
     {
         return $this->hasMany(Duel::class, 'opponent_id');
     }
 
-     public function votes()
+    /**
+     * Get the votes cast by the user.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function votes()
     {
         return $this->hasMany(Vote::class);
     }

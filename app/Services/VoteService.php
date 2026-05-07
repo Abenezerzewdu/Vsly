@@ -8,8 +8,17 @@ use App\Models\Vote;
 class VoteService
 {
    
-   public function vote(Duel $duel, User $user, int $votedFor): void
-{
+    /**
+     * Submit a vote for a participant in a duel.
+     * 
+     * @param \App\Models\Duel $duel
+     * @param \App\Models\User $user
+     * @param int $votedFor
+     * @return void
+     * @throws \Exception
+     */
+    public function vote(Duel $duel, User $user, int $votedFor): void
+    {
     //  Prevent duplicate vote
     if ($duel->votes()->where('user_id', $user->id)->exists()) {
         throw new \Exception('You have already voted.');
@@ -33,8 +42,14 @@ class VoteService
     $this->recalculateWinner($duel);
 }
 
-private function recalculateWinner(Duel $duel): void
-{
+    /**
+     * Recalculate the winner of the duel based on the current votes.
+     * 
+     * @param \App\Models\Duel $duel
+     * @return void
+     */
+    private function recalculateWinner(Duel $duel): void
+    {
     $votes = $duel->votes()
         ->selectRaw('voted_for, COUNT(*) as total')
         ->groupBy('voted_for')
@@ -60,8 +75,15 @@ private function recalculateWinner(Duel $duel): void
     $duel->save();
 }
     //duel winner for now dictated by the votes
+    /**
+     * Explicitly decide the winner for a finished duel.
+     * 
+     * @param \App\Models\Duel $duel
+     * @return void
+     * @throws \Exception
+     */
     public function decideWinner(Duel $duel): void
-{
+    {
     if ($duel->status !== 'finished') {
         throw new \Exception('Duel not finished.');
     }
