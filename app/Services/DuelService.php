@@ -198,5 +198,22 @@ class DuelService
     } else {
         $duel->status = 'finished';
     }
+    /**
+     * Terminate a duel because a participant failed to make a move in time.
+     * 
+     * @param \App\Models\Duel $duel
+     * @return void
+     */
+    public function expireDuel(Duel $duel): void
+    {
+        // Determine who failed (the person whose turn it was)
+        $winnerId = $duel->turn === 'challenger'
+            ? $duel->opponent_id
+            : $duel->challenger_id;
+
+        $duel->status = 'finished';
+        $duel->winner_id = $winnerId;
+        $duel->save();
+    }
 }
 }

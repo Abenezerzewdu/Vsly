@@ -80,4 +80,29 @@ class Duel extends Model
     {
         return $this->hasMany(Vote::class);
     }
+    /**
+     * Get the attributes that should be cast.
+     * 
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'turn_started_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Check if the current turn has expired based on the time limit.
+     * 
+     * @return bool
+     */
+    public function isTurnExpired(): bool
+    {
+        if (!$this->turn_started_at) {
+            return false;
+        }
+
+        return now()->diffInSeconds($this->turn_started_at) > $this->turn_time_limit;
+    }
 }
