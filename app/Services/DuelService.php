@@ -216,4 +216,3 @@ class DuelService
         $duel->save();
     }
 }
-}
