@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vote extends Model
 {
-    //
-    
     use HasFactory;
 
     protected $fillable = [
@@ -17,22 +15,33 @@ class Vote extends Model
         'voted_for'
     ];
 
-    //  duel being voted on
+    /**
+     * Get the duel being voted on.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function duel()
     {
         return $this->belongsTo(Duel::class);
     }
 
-    //  voter
+    /**
+     * Get the user who cast the vote.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    //  who they voted for
+    /**
+     * Get the user who was voted for.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function votedFor()
     {
         return $this->belongsTo(User::class, 'voted_for');
     }
-
 }

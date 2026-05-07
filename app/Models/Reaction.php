@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reaction extends Model
 {
-    //
-     use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'take_id',
@@ -16,11 +15,21 @@ class Reaction extends Model
         'type'
     ];
 
+    /**
+     * Get the take that the reaction belongs to.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function take()
     {
         return $this->belongsTo(Take::class);
     }
 
+    /**
+     * Get the user who reacted.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
