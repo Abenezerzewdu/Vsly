@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Round extends Model
 {
-    //
-     use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'duel_id',
@@ -18,7 +17,11 @@ class Round extends Model
         'completed'
     ];
 
-    //  belongs to duel
+    /**
+     * Get the duel that the round belongs to.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function duel()
     {
         return $this->belongsTo(Duel::class);
