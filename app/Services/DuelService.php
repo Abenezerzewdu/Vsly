@@ -7,6 +7,61 @@ use Illuminate\Support\Facades\DB;
 
 class DuelService
 {
+    /**
+     * Create a new duel from a take challenge.
+     * 
+     * @param \App\Models\Take $take
+     * @param \App\Models\User $user The challenger
+     * @return \App\Models\Duel
+     * @throws \Exception
+     */
+    public function createDuel(\App\Models\Take $take, User $user): Duel
+    {
+        // Prevent duplicate active duel
+        $existing = Duel::where('take_id', $take->id)
+            ->where(function ($q) use ($user, $take) {
+                $q->where('challenger_id', $user->id)
+                  ->where('opponent_id', $take->user_id);
+            })
+            ->where('status', 'active')
+            ->exists();
+
+        if ($existing) {
+            throw new \Exception('Duel already active.');
+        }
+
+        return DB::transaction(function () use ($take, $user) {
+            // Create duel
+            $duel = Duel::create([
+                'take_id' => $take->id,
+                'challenger_id' => $user->id,
+                'opponent_id' => $take->user_id,
+                'status' => 'active',
+                'current_round' => 1,
+                'total_rounds' => 3,
+                'turn' => 'challenger',
+                'turn_time_limit' => 120, // default (2 min)
+                'turn_started_at' => now(),
+            ]);
+
+            // Create first round
+            $duel->rounds()->create([
+                'round_number' => 1,
+            ]);
+
+            return $duel;
+        });
+    }
+
+    /**
+     * Submit a move for a participant in a duel.
+     * 
+     * @param \App\Models\Duel $duel
+     * @param \App\Models\User $user
+     * @param string $response
+     * @return void
+     * @throws \Exception
+     */
     public function submitMove(Duel $duel, User $user, string $response): void
     {
         DB::transaction(function () use ($duel, $user, $response) {
@@ -36,6 +91,13 @@ class DuelService
         });
     }
 
+    /**
+     * Ensure the current turn has not expired based on the time limit.
+     * 
+     * @param \App\Models\Duel $duel
+     * @return void
+     * @throws \Exception
+     */
     private function ensureTurnNotExpired(Duel $duel): void
 {
     if (!$duel->turn_started_at) {
@@ -51,6 +113,16 @@ class DuelService
     }
 }
 
+    /**
+     * Apply the participant's move to the current round and update duel state.
+     * 
+     * @param \App\Models\Duel $duel
+     * @param \App\Models\Round $round
+     * @param \App\Models\User $user
+     * @param string $response
+     * @return void
+     * @throws \Exception
+     */
     private function applyMove($duel, $round, $user, $response): void
 {
     $isChallenger = $user->id === $duel->challenger_id;
@@ -90,11 +162,24 @@ class DuelService
         throw new \Exception('Unauthorized participant.');
     }
 }
+    /**
+     * Check if both participants have submitted their responses for the round.
+     * 
+     * @param \App\Models\Round $round
+     * @return bool
+     */
     private function isRoundComplete($round): bool
     {
         return $round->challenger_response && $round->opponent_response;
     }
 
+    /**
+     * Complete the current round and advance to the next or finish the duel.
+     * 
+     * @param \App\Models\Duel $duel
+     * @param \App\Models\Round $round
+     * @return void
+     */
     private function completeRound(Duel $duel, $round): void
 {
     $round->completed = true;

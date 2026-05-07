@@ -11,101 +11,91 @@ use Inertia\Inertia;
 
 class DuelController extends Controller
 {
-    //make a challenge in a take
-     public function store(Request $request, Take $take)
+    /**
+     * Create a new duel challenge for a specific take.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Take $take
+     * @param \App\Services\DuelService $duelService
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(Request $request, Take $take, DuelService $duelService)
     {
-        $user = $request->user();
+        try {
+            $this->authorize('create', [Duel::class, $take]);
 
-        //  Prevent self challenge
-        $this->authorize('create', [Duel::class, $take]);
-        
+            $duel = $duelService->createDuel($take, $request->user());
 
-        //  Prevent duplicate active duel
-        $existing = Duel::where('take_id', $take->id)
-            ->where(function ($q) use ($user, $take) {
-                $q->where('challenger_id', $user->id)
-                  ->where('opponent_id', $take->user_id);
-            })
-            ->where('status', 'active')
-            ->exists();
-
-        if ($existing) {
-            return redirect()->back()->with('error', 'Duel already active.');
+            return redirect()->route('duels.show', $duel)
+                ->with('success', 'Challenge issued!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        //  Create duel
-        $duel = Duel::create([
-    'take_id' => $take->id,
-    'challenger_id' => $user->id,
-    'opponent_id' => $take->user_id,
-    'status' => 'active',
-    'current_round' => 1,
-    'total_rounds' => 3,
-    'turn' => 'challenger',
-    'turn_time_limit' => 120, // default (2 min)
-    'turn_started_at' => now(),
-]);
-        //  Create first round
-        Round::create([
-            'duel_id' => $duel->id,
-            'round_number' => 1,
-        ]);
-
-        return redirect()->route('duels.show', $duel);
     }
 
-    //make a move for challenges
+    /**
+     * Submit a move for the current participant in the duel.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Duel $duel
+     * @param \App\Services\DuelService $duelService
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function submitMove(Request $request, Duel $duel, DuelService $duelService)
-{
-    $validated = $request->validate([
-        'response' => ['required', 'string', 'max:500']
-    ]);
+    {
+        $validated = $request->validate([
+            'response' => ['required', 'string', 'max:500']
+        ]);
 
-    $this->authorize('respond', $duel);
+        try {
+            $this->authorize('respond', $duel);
 
-    $duelService->submitMove(
-        duel: $duel,
-        user: $request->user(),
-        response: $validated['response']
-    );
+            $duelService->submitMove(
+                duel: $duel,
+                user: $request->user(),
+                response: $validated['response']
+            );
 
-    return back()->with('success', 'Move submitted.');
-}
+            return back()->with('success', 'Move submitted.');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
 
-//
-public function show(Duel $duel)
-{
-    $duel->load([
-        'challenger:id,name',
-        'opponent:id,name',
-        'rounds',
-        'votes'
-    ]);
+    /**
+     * Display the specified duel with its rounds and votes.
+     * 
+     * @param \App\Models\Duel $duel
+     * @return \Inertia\Response
+     */
+    public function show(Duel $duel)
+    {
+        $duel->load([
+            'challenger:id,name',
+            'opponent:id,name',
+            'rounds',
+            'votes'
+        ]);
 
-    return Inertia::render('Duels/Show', [
-        'duel' => [
-            'id' => $duel->id,
-            'status' => $duel->status,
-            'current_round' => $duel->current_round,
-            'total_rounds' => $duel->total_rounds,
-
-            'challenger' => $duel->challenger,
-            'opponent' => $duel->opponent,
-
-            'winner_id' => $duel->winner_id,
-
-            // vote stats
-            'votes' => $duel->votes
-                ->groupBy('voted_for')
-                ->map(fn ($group) => $group->count()),
-
-            // rounds data
-            'rounds' => $duel->rounds->map(fn ($round) => [
-                'round_number' => $round->round_number,
-                'challenger_response' => $round->challenger_response,
-                'opponent_response' => $round->opponent_response,
-            ]),
-        ]
-    ]);
-}
+        return Inertia::render('Duels/Show', [
+            'duel' => [
+                'id' => $duel->id,
+                'status' => $duel->status,
+                'current_round' => $duel->current_round,
+                'total_rounds' => $duel->total_rounds,
+                'challenger' => $duel->challenger,
+                'opponent' => $duel->opponent,
+                'winner_id' => $duel->winner_id,
+                'votes_stats' => $duel->votes
+                    ->groupBy('voted_for')
+                    ->map(fn($group) => $group->count()),
+                'rounds' => $duel->rounds->map(fn($round) => [
+                    'round_number' => $round->round_number,
+                    'challenger_response' => $round->challenger_response,
+                    'opponent_response' => $round->opponent_response,
+                    'completed' => $round->completed,
+                ]),
+            ]
+        ]);
+    }
 }
