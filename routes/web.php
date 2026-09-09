@@ -28,8 +28,17 @@ Route::middleware('auth')->group(function () {
 });
 
    
-//takes route 
-Route::resource('takes', TakeController::class);
+//takes route
+Route::get('/takes', [TakeController::class, 'index'])->name('takes.index');
+Route::get('/takes/{take}', [TakeController::class, 'show'])->name('takes.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/takes/create', [TakeController::class, 'create'])->name('takes.create');
+    Route::post('/takes', [TakeController::class, 'store'])->name('takes.store');
+    Route::get('/takes/{take}/edit', [TakeController::class, 'edit'])->name('takes.edit');
+    Route::patch('/takes/{take}', [TakeController::class, 'update'])->name('takes.update');
+    Route::delete('/takes/{take}', [TakeController::class, 'destroy'])->name('takes.destroy');
+});
 
 
 Route::post('/takes/{take}/challenge', [DuelController::class, 'store'])

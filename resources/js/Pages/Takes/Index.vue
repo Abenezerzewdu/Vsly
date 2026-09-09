@@ -1,10 +1,12 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 
 defineProps({
-    takes: Object, // paginated
+    takes: Object,
 });
+
+const authUser = usePage().props.auth?.user;
 </script>
 
 <template>
@@ -15,10 +17,18 @@ defineProps({
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">Takes</h2>
                 <Link
+                    v-if="authUser"
                     :href="route('takes.create')"
                     class="rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700"
                 >
                     Post a Take
+                </Link>
+                <Link
+                    v-else
+                    :href="route('login')"
+                    class="rounded-md border border-gray-300 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 hover:bg-gray-50"
+                >
+                    Log in to post
                 </Link>
             </div>
         </template>
@@ -38,7 +48,7 @@ defineProps({
                     <p class="text-gray-900 text-base">{{ take.content }}</p>
                     <div class="flex items-center justify-between text-sm text-gray-500">
                         <span>
-                            by <span class="font-medium text-gray-700">{{ take.user.name }}</span>
+                            by <span class="font-medium text-gray-700">{{ take.user?.name ?? 'Unknown' }}</span>
                             · {{ take.created_at }}
                         </span>
                         <Link

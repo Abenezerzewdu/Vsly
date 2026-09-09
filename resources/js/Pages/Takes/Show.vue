@@ -46,7 +46,7 @@ function deleteTake() {
                     <p class="text-gray-900 text-lg leading-relaxed mb-4">{{ take.content }}</p>
                     <div class="flex items-center justify-between text-sm text-gray-500">
                         <span>
-                            by <span class="font-medium text-gray-700">{{ take.user.name }}</span>
+                            by <span class="font-medium text-gray-700">{{ take.user?.name ?? 'Unknown' }}</span>
                             · {{ take.created_at }}
                         </span>
                         <span class="text-gray-400">{{ take.duels_count }} duel{{ take.duels_count !== 1 ? 's' : '' }}</span>

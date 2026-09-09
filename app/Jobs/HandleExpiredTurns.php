@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Duel;
+use App\Services\DuelService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
