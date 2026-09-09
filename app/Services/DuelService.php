@@ -198,6 +198,7 @@ class DuelService
     } else {
         $duel->status = 'finished';
     }
+}
     /**
      * Terminate a duel because a participant failed to make a move in time.
      * 

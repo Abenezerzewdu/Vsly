@@ -3,6 +3,7 @@
 use App\Http\Controllers\DuelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TakeController;
+use App\Http\Controllers\VoteController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -36,6 +37,9 @@ Route::post('/takes/{take}/challenge', [DuelController::class, 'store'])
     ->middleware('auth');
 
 //duel
+Route::get('/duels/{duel}', [DuelController::class, 'show'])
+    ->name('duels.show');
+
 Route::post('/duels/{duel}/move', [DuelController::class, 'submitMove'])
     ->name('duels.move')
     ->middleware('auth');
